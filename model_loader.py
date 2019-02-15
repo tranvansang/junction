@@ -1,9 +1,10 @@
 import tensorflow as tf
 import numpy as np
+import sys
 
 tf.reset_default_graph()
 
-inputValue = np.array([3])
+inputValue = np.array([sys.argv[1]])
 
 init = tf.global_variables_initializer()
 with tf.Session() as session:
