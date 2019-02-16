@@ -1,3 +1,6 @@
+#The code that loads the chatbot model and responds to user inputs
+#Run it with python chatbot_loader.py. It will ask for input.
+
 import tensorflow as tf
 import numpy as np
 import string
@@ -7,14 +10,13 @@ def init():
     tf.reset_default_graph()
     init = tf.global_variables_initializer()
     session = tf.Session()
-    #the next few lines load the model
-    #i want to input obj here instead of 'model.meta' string
     saver = tf.train.import_meta_graph('model.meta')
     saver.restore(session,tf.train.latest_checkpoint('./'))
     session.run(init)
     
     return session
 
+#word2idx and idx2word are dictionaries that convert word to number and number to word
 def chat(session, inputValue, word2idx, idx2word):
     graph = tf.get_default_graph()
     input_data = graph.get_tensor_by_name("input:0")
@@ -30,12 +32,15 @@ def chat(session, inputValue, word2idx, idx2word):
     
     for i in range(11 - len(inputValue)):
         inputValue.append(word2idx['PAD'])
+    inputValue = inputValue[0:11]
     
     inputValue = np.array(inputValue)
     inputValue = np.reshape(inputValue, [1, inputValue.size])
     
+    #input the message to the model
     output = session.run(predict_op, feed_dict={input_data: inputValue})
     
+    #processes the output message
     output = np.reshape(output, [inputValue.size])
     outputString = ''
     for word in output:
@@ -47,6 +52,8 @@ def remove_punctuation(s):
     return s.translate(str.maketrans('', '', string.punctuation))
 
 def get_dictionary():
+    
+    #retrieves dictionary necessary to convert between words and vectors
     word2idx = {'START': 0, 'END': 1, 'PAD': 2}
     current_idx = 3
     for line in open('robert_frost.txt'):
@@ -68,7 +75,7 @@ def main():
     
     session = init()
     while True:
-        inputValue = input()
+        inputValue = input("please input message: ")
         sessionTuple, output = chat(session, inputValue, word2idx, idx2word)
         print("output: " + str(output))
 

@@ -119,12 +119,11 @@ def main():
 
     N = comments.shape[0]
     batch_sz = 143
-    iterations = 1000
+    iterations = 10000
     n_batches = N // batch_sz
     
-def build():
     #Make the recurrent cells
-    recurrentLayerSizes = [500, 250]
+    recurrentLayerSizes = [500]
     recurrentLayers = []
     
     for i in recurrentLayerSizes:
@@ -132,7 +131,7 @@ def build():
         recurrentLayers.append(cell)
     
     multiRNNCells = tf.nn.rnn_cell.MultiRNNCell(recurrentLayers)
-    multiRNNCells = tf.nn.rnn_cell.DropoutWrapper(multiRNNCells, input_keep_prob=0.5)
+    multiRNNCells = tf.nn.rnn_cell.DropoutWrapper(multiRNNCells, input_keep_prob=0.2, state_keep_prob=0.5)
     
     #Make the embeddings
     embeddingD = 100
@@ -163,7 +162,7 @@ def build():
     
     logits = tf.matmul(recuOutput, Wout) + bout
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=logits, labels=targets), name='cost')
-    train_op = tf.train.RMSPropOptimizer(0.0000001, decay=0.99, momentum=0.9).minimize(cost)
+    train_op = tf.train.RMSPropOptimizer(0.000001, decay=0.99, momentum=0.9).minimize(cost)
     tf.add_to_collection('optimizer', train_op)
     predict_op = tf.argmax(logits, 1, name="predict")
 
@@ -186,12 +185,42 @@ def build():
                 print("Cost / err at iteration i=%d, j=%d: %.3f / %.3f" % (i, j, test_cost, err))
             costs.append(test_cost)
             
-            if (i + 1) % 100 == 0:
+            if (i + 1) % 1000 == 0:
                 saver.save(session, "model")
         plt.plot(costs)
         plt.show()
 
 def retrain():
+    sentences, word2idx = get_robert_frost()
+    idx2word = {}
+    for word in word2idx:
+        idx2word[word2idx[word]] = word
+    vocabsize = len(word2idx)
+    sentence_length = len(sentences[0])
+    
+    comments = []
+    responses = []
+    
+    for i in range(len(sentences)):
+        if i % 2 == 0:
+            comments.append(sentences[i])
+        else:
+            responses.append(sentences[i])
+    
+    comments = np.array(comments).astype(np.int32)
+    responses = np.array(responses).astype(np.int32)
+    comments, responses = shuffle(comments, responses)
+    original_responses = np.reshape(responses, [np.prod(responses.shape)])
+    
+    onehot = np.zeros((responses.shape[0], sentence_length, vocabsize))
+    onehot[:,:,responses[:,:]] = 1
+    responses = onehot
+
+    N = comments.shape[0]
+    batch_sz = 143
+    iterations = 10000
+    n_batches = N // batch_sz
+    
     tf.reset_default_graph()
     init = tf.global_variables_initializer()
     costs = []
@@ -200,10 +229,10 @@ def retrain():
         saver = tf.train.import_meta_graph('model.meta')
         saver.restore(session,tf.train.latest_checkpoint('./'))
         graph = tf.get_default_graph()
-    	input_data = graph.get_tensor_by_name("input:0")
-    	targets = graph.get_tensor_by_name("targets:0")
-    	cost = graph.get_tensor_by_name("cost:0")
-    	predict_op = graph.get_tensor_by_name("predict:0")
+        input_data = graph.get_tensor_by_name("input:0")
+        targets = graph.get_tensor_by_name("targets:0")
+        cost = graph.get_tensor_by_name("cost:0")
+        predict_op = graph.get_tensor_by_name("predict:0")
         train_op = tf.get_collection('optimizer')[0]
         for i in range(iterations):
             for j in range(n_batches):
@@ -218,13 +247,13 @@ def retrain():
                 print("Cost / err at iteration i=%d, j=%d: %.3f / %.3f" % (i, j, test_cost, err))
             costs.append(test_cost)
             
-            if (i + 1) % 100 == 0:
+            if (i + 1) % 1000 == 0:
                 saver.save(session, "model")
         plt.plot(costs)
         plt.show()
 
 main()
-retrain()
+#retrain()
 
 
 
