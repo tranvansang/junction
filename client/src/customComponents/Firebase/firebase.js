@@ -18,11 +18,11 @@ class Firebase {
     this.database = app.database();
   }
 
-  createUserWithEmailAndPassword = (email, password) =>
-    this.auth.createUserWithEmailAndPassword(email, password);
+  createUserWithEmailAndPassword = async (email, password) =>
+    await this.auth.createUserWithEmailAndPassword(email, password);
 
-  signInWithEmailAndPassword = (email, password) =>
-    this.auth.signInWithEmailAndPassword(email, password);
+  signInWithEmailAndPassword = async (email, password) =>
+    await this.auth.signInWithEmailAndPassword(email, password);
 
   signOut = () => this.auth.signOut();
 
@@ -85,7 +85,7 @@ class Firebase {
 
   getBot = (owner_id, bot_id) =>
     this.database
-      .ref(`owners/${owner_id}/${bot_id}`)
+      .ref(`owners/${owner_id}/bots/${bot_id}`)
       .once("value")
       .then(snapshot => {
         if (!snapshot.exists()) {
@@ -119,6 +119,18 @@ class Firebase {
       return snapshot.val();
     });
 
+  getLastMessage = conversation_id =>
+    this.database
+      .ref(`conversations/${conversation_id}/last_message`)
+      .then(snapshot => {
+        if (!snapshot.exists()) {
+          throw {
+            message: `There is no last message in conversation with conversation_id: ${conversation_id}`
+          };
+        }
+        return snapshot.val();
+      });
+
   getMessage = (conversation_id, message_id) =>
     this.database
       .ref(`conversations/${conversation_id}/messages/${message_id}`)
@@ -148,7 +160,9 @@ class Firebase {
         message: `bot_id is empty or nil: ${bot_id}`
       };
     }
-    return this.database.ref(`owners/${owner_id}/${bot_id}`).update(payload);
+    return this.database
+      .ref(`owners/${owner_id}/bots/${bot_id}`)
+      .update(payload);
   };
 
   updateConversation = (conversation_id, payload) => {
@@ -174,46 +188,45 @@ class Firebase {
   // CUSTOM FUNCTIONS
 
   addBot = ({ name, description, source_code, model_url }) => {
-    const user_id = getCurrentUserId();
+    const user_id = this.getCurrentUserId();
 
-    const bot_id = generateKey();
+    const bot_id = this.generateKey();
 
     const bot_payload = {
       id: bot_id,
       name,
       description,
-      conversations: {},
       ready: false,
       source_code,
       model_url
     };
 
-    updateBot(user_id, bot_id, bot_payload);
+    this.updateBot(user_id, bot_id, bot_payload);
   };
 
   addConversation = async ({ owner_id, bot_id, chatter_id }) => {
-    const conversation_id = generateKey();
+    const conversation_id = this.generateKey();
 
     // update owner bot
     await this.database
-      .ref(`owners/${owner_id}/bots/${bot_id}/conversations/${conversation_id}`)
-      .set(1);
+      .ref(`owners/${owner_id}/bots/${bot_id}/conversations`)
+      .push(conversation_id);
 
     // update chatter
     await this.database
-      .ref(`chatters/${chatter_id}/conversations/${conversation_id}`)
-      .set(1);
+      .ref(`chatters/${chatter_id}/conversations`)
+      .push(conversation_id);
 
     // create conversation
     const conversation_payload = {
       bot_id,
       chatter_id
     };
-    updateConversation(conversation_id, conversation_payload);
+    this.updateConversation(conversation_id, conversation_payload);
   };
 
   addMessage = async ({ conversation_id, payload }) => {
-    const message_id = generateKey();
+    const message_id = this.generateKey();
 
     // message payload
     const message_payload = {
@@ -233,22 +246,36 @@ class Firebase {
       .set(message_payload);
   };
 
-  registerToConversation = async conversation_id => {
-    await this.database
+  registerToConversation = (conversation_id, callback) => {
+    this.database
       .ref(`conversations/${conversation_id}/messages`)
       .orderByChild("reverse_timestamp")
-      .limitToFirst(30)
+      .limitToFirst(50)
       .on("child_added")
       .then(snapshot => {
         if (!snapshot.exists()) {
-          return {};
+          callback(null);
         }
-        return snapshot.val();
+        callback(snapshot.val());
       });
   };
 
   unregisterFromConversation = conversation_id => {
     this.database.ref(`conversations/${conversation_id}/messages`).off();
+  };
+
+  loadConversations = chatter_id => {
+    this.database
+      .ref(`chatters/${chatter_id}/conversations`)
+      .once("value")
+      .then(snapshot => {
+        if (!snapshot.exists()) {
+          throw {
+            message: `There is no conversations at chatter with chatter_id: ${chatter_id}`
+          };
+        }
+        return snapshot.val();
+      });
   };
 
   // HELPER FUNCTIONS

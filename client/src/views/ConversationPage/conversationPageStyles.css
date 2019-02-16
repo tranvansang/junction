@@ -1,0 +1,17 @@
+.chat-dashboard {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch; }
+
+.chat-dashboard-title {
+  font-weight: 500;
+  padding-bottom: 2rem; }
+
+.chat-list {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch; }
+  .chat-list .chat-list-item {
+    height: 80px;
+    display: flex;
+    flex-direction: row; }

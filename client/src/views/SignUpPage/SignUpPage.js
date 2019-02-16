@@ -22,6 +22,7 @@ import Parallax from "components/Parallax/Parallax";
 import { withFirebase } from "customComponents/Firebase";
 
 import signInPageStyle from "assets/jss/material-kit-react/views/signInPageStyle";
+import { auth } from "firebase";
 
 class SignUp extends React.Component {
   componentDidMount() {
@@ -73,10 +74,14 @@ class SignUpFormBase extends React.Component {
 
   onSubmit = event => {
     const { name, email, password1 } = this.state;
+    const { firebase } = this.props;
 
-    this.props.firebase
+    firebase
       .createUserWithEmailAndPassword(email, password1)
       .then(authUser => {
+        return firebase.updateOwner(authUser.user.uid, { name, email });
+      })
+      .then(() => {
         this.setState({
           name: "",
           email: "",
