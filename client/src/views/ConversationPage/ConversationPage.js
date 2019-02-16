@@ -17,6 +17,28 @@ import flatten from "lib/flatten";
 import { withFirebase } from "customComponents/Firebase";
 
 export class ConversationPage extends Component {
+  state = {
+    bot: {
+      name: 'bot 1 name',
+    },
+    chatter: {
+      name: 'chatter 1 name'
+    },
+    messages: [
+      {
+        key: 'message 1 key',
+        payload: 'first message',
+        is_bot: false,
+        createdAt: new Date(2019, 1, 1, 10, 0)
+      },
+      {
+        key: 'message 2 key',
+        payload: 'a response from bot',
+        is_bot: true,
+        createdAt: new Date(2019, 1, 1, 10, 5)
+      },
+    ]
+  }
   constructor(props) {
     super(props);
 
@@ -40,10 +62,10 @@ export class ConversationPage extends Component {
       this.setState({ name, photo_url });
 
       await firebase.getConversation(conversation_id).then(conversation => {
-        
+
       })
     })
-    
+
   };
 
   render() {
@@ -51,6 +73,12 @@ export class ConversationPage extends Component {
     return (
       <div>
         <h1>ConversationPage</h1>
+        List of message
+        {
+          this.state.messages.map(message => <div key={message.key}>
+            {message.payload}
+          </div>)
+        }
       </div>
     );
   }
