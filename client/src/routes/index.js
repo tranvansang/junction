@@ -10,9 +10,16 @@ import NotFoundPage from "views/NotFoundPage/NotFoundPage";
 import ForgotPasswordPage from "views/ForgotPasswordPage/ForgotPasswordPage";
 
 var indexRoutes = [
+  { path: "*", name: "NotFoundPage", component: NotFoundPage },
   { path: "/", name: "LandingPage", component: LandingPage },
+  { path: "/test", name: "LandingPage", component: LandingPage },
   { path: "/signin", name: "SignInPage", component: SignInPage },
   { path: "/signup", name: "SignUpPage", component: SignUpPage },
+  {
+    path: "/forgotpassword",
+    name: "ForgotPasswordPage",
+    component: ForgotPasswordPage
+  },
   {
     path: "/home/:user_id",
     name: "HomePage",
@@ -37,13 +44,7 @@ var indexRoutes = [
     path: "/owner/:owner_id/bot/:bot_id",
     name: "BotPage",
     component: BotPage
-  },
-  {
-    path: "/forgotpassword",
-    name: "ForgotPasswordPage",
-    component: ForgotPasswordPage
-  },
-  { path: "*", name: "NotFoundPage", component: NotFoundPage }
+  }
 ];
 
 export default indexRoutes;
