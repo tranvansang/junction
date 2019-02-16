@@ -17,9 +17,16 @@ import "./styles/chatDashboardStyles.sass";
 
 const style = {
   ...cardsStyle,
-  img: {
+  imgRight: {
     marginTop: "15px",
     marginRight: "20px",
+    width: "50px",
+    height: "50px",
+    border: "solid 1px #e91e63"
+  },
+  imgLeft: {
+    marginTop: "15px",
+    marginLeft: "20px",
     width: "50px",
     height: "50px",
     border: "solid 1px #e91e63"
