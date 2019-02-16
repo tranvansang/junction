@@ -33,17 +33,12 @@ class SignInPage extends Component {
       <div>
         <Parallax image={require("assets/img/client/bg.jpg")} filter="dark">
           <div className={classes.container}>
-            <div className={classes.container}>
-              <GridContainer
-                justify="center"
-                style={{ padding: "250px 0 0 0" }}
-              >
-                <GridItem xs={12} sm={10} md={6}>
-                  <SignInForm classes={classes} />
-                  <SignInLink classes={classes} />
-                </GridItem>
-              </GridContainer>
-            </div>
+            <GridContainer justify="center" style={{ padding: "250px 0 0 0" }}>
+              <GridItem xs={12} sm={10} md={6}>
+                <SignInForm classes={classes} />
+                <SignInLink classes={classes} />
+              </GridItem>
+            </GridContainer>
           </div>
         </Parallax>
       </div>

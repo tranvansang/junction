@@ -1,6 +1,7 @@
 import React from "react";
-// nodejs library that concatenates classes
-import classNames from "classnames";
+import { compose } from "recompose";
+// react components for routing our app without refresh
+import { Link, withRouter } from "react-router-dom";
 // @material-ui/core components
 import withStyles from "@material-ui/core/styles/withStyles";
 import List from "@material-ui/core/List";
@@ -40,30 +41,38 @@ const ProtoFooter = props => {
       content={
         <div>
           <div className={classes.left}>
-            <a href="#" className={classes.footerBrand}>
+            <a href="/" className={classes.footerBrand}>
               Chatbot Hub
             </a>
           </div>
           <div className={classes.pullCenter}>
             <List className={classes.list}>
               <ListItem className={classes.inlineBlock}>
-                <a href="#product" className={classes.block}>
-                  about
-                </a>
-              </ListItem>
-              <ListItem className={classes.inlineBlock}>
-                <a href="#team" className={classes.block}>
-                  team
-                </a>
-              </ListItem>
-              <ListItem className={classes.inlineBlock}>
-                <a
-                  href="#work"
-                  onClick={e => e.preventDefault()}
+                <Link
+                  to="/#product"
                   className={classes.block}
+                  style={{ color: "white" }}
+                >
+                  about
+                </Link>
+              </ListItem>
+              <ListItem className={classes.inlineBlock}>
+                <Link
+                  to="/#team"
+                  className={classes.block}
+                  style={{ color: "white" }}
+                >
+                  Team
+                </Link>
+              </ListItem>
+              <ListItem className={classes.inlineBlock}>
+                <Link
+                  to="/#work"
+                  className={classes.block}
+                  style={{ color: "white" }}
                 >
                   Contact Us
-                </a>
+                </Link>
               </ListItem>
             </List>
           </div>
@@ -119,6 +128,9 @@ const ProtoFooter = props => {
   );
 };
 
-const Footer = withStyles(footerStyles)(ProtoFooter);
+const Footer = compose(
+  withRouter,
+  withStyles(footerStyles)
+)(ProtoFooter);
 
 export { Header, Footer };

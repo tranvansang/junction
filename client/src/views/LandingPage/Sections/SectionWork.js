@@ -81,9 +81,7 @@ class SectionWork extends Component {
                     id="email"
                     inputProps
                     formControlProps={{
-                      fullWidth: true
-                    }}
-                    inputProps={{
+                      fullWidth: true,
                       name: "email",
                       onChange: this.onChange,
                       value: email
