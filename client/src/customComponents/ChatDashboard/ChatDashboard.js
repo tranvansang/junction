@@ -1,13 +1,15 @@
 import React, { Component } from "react";
+import { compose } from "recompose";
 import cn from "classnames";
+// react components for routing our app without refresh
+import { Link, withRouter } from "react-router-dom";
 // @material-ui/core components
 import withStyles from "@material-ui/core/styles/withStyles";
 // core components
 import Card from "components/Card/Card";
 import CardBody from "components/Card/CardBody";
-import CardFooter from "components/Card/CardFooter";
 
-import avatar from "assets/img/client/sergei-square.jpg";
+import { withFirebase } from "customComponents/Firebase";
 
 import cardsStyle from "assets/jss/material-kit-react/views/componentsSections/sectionCards";
 
@@ -24,20 +26,39 @@ const style = {
   }
 };
 
-// import { getUserAvatar } from "../reducers/user";
-// import {
-//   getConversationImg,
-//   getConversationTitle
-// } from "../actions/conversation";
-
 class ChatDashboard extends Component {
-  navigateToChat = conversationId => () =>
-    this.props.history.push(`/chat/${conversationId}`);
+  constructor(props) {
+    super(props);
 
-  componentDidMount() {
-    // this.loadData();
+    this.state = {
+      name: "",
+      photo_url: "",
+      conversations: {},
+      lastMessages: {}
+    };
   }
-  loadData() {
+  componentDidMount() {
+    window.scrollTo(0, 0);
+    document.body.scrollTop = 0;
+
+    this.loadData();
+  }
+
+  navigateToChat = conversation_id => () =>
+    this.props.history.push(`/chat/${conversation_id}`);
+
+  loadData = () => {
+    const { firebase, chatter_id } = this.props;
+    firebase.getChatter(chatter_id).then(chatter => {
+      const { name, photo_url, conversations } = chatter;
+      this.setState({ name, photo_url, conversations });
+
+      for ([conversation_id, val] in conversations) {
+        console.log(conversation_id);
+        firebase.getLastMessage(conversation_id).then();
+      }
+    });
+
     const {
       users,
       chatList,
@@ -57,7 +78,7 @@ class ChatDashboard extends Component {
       )
         loadUser(co.info.last_message.user);
     });
-  }
+  };
   componentDidUpdate() {
     // this.loadData();
   }
@@ -71,7 +92,7 @@ class ChatDashboard extends Component {
     } = this.props;
     return (
       <div className="chat-dashboard">
-        <h1 className="chat-dashboard-title">Chat box</h1>
+        <h1 className="chat-dashboard-title">Chats</h1>
         <div className="chat-list">
           <Card plain>
             <CardBody>
@@ -90,6 +111,7 @@ class ChatDashboard extends Component {
                   <h4>Chat Message</h4>
                 </span>
                 <br />
+                <hr />
               </div>
             </CardBody>
           </Card>
@@ -99,4 +121,7 @@ class ChatDashboard extends Component {
   }
 }
 
-export default withStyles(style)(ChatDashboard);
+export default compose(
+  withFirebase,
+  withStyles(style)
+)(ChatDashboard);
