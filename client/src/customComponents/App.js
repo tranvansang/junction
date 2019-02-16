@@ -3,7 +3,6 @@ import { Router, Route, Switch } from "react-router";
 import { createBrowserHistory } from "history";
 // core components
 import { Header, Footer } from "customComponents/HeaderFooter";
-import LandingPage from "views/LandingPage/LandingPage";
 
 import indexRoutes from "routes/index";
 
@@ -23,10 +22,14 @@ class App extends Component {
         <div>
           <Header color="transparent" />
           <Switch>
-            <Route exact path="/" key="LandingPage" component={LandingPage} />
             {indexRoutes.map((prop, key) => {
               return (
-                <Route path={prop.path} key={key} component={prop.component} />
+                <Route
+                  exact
+                  path={prop.path}
+                  key={key}
+                  component={prop.component}
+                />
               );
             })}
           </Switch>
