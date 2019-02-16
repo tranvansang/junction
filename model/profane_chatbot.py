@@ -122,6 +122,7 @@ def main():
     iterations = 1000
     n_batches = N // batch_sz
     
+def build():
     #Make the recurrent cells
     recurrentLayerSizes = [500, 250]
     recurrentLayers = []
@@ -161,8 +162,9 @@ def main():
     recuOutput = tf.reshape(recuOutput, [shape[0] * shape[1], recurrentLayerSizes[-1]])
     
     logits = tf.matmul(recuOutput, Wout) + bout
-    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=logits, labels=targets))
-    train_op = tf.train.RMSPropOptimizer(0.00001, decay=0.99, momentum=0.9).minimize(cost)
+    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=logits, labels=targets), name='cost')
+    train_op = tf.train.RMSPropOptimizer(0.0000001, decay=0.99, momentum=0.9).minimize(cost)
+    tf.add_to_collection('optimizer', train_op)
     predict_op = tf.argmax(logits, 1, name="predict")
 
     
@@ -183,13 +185,46 @@ def main():
                 err = error_rate(prediction, original_responses)
                 print("Cost / err at iteration i=%d, j=%d: %.3f / %.3f" % (i, j, test_cost, err))
             costs.append(test_cost)
-
+            
+            if (i + 1) % 100 == 0:
+                saver.save(session, "model")
         plt.plot(costs)
         plt.show()
-        save_path = saver.save(session, "model")
+
+def retrain():
+    tf.reset_default_graph()
+    init = tf.global_variables_initializer()
+    costs = []
+    with tf.Session() as session:
+        session.run(init)
+        saver = tf.train.import_meta_graph('model.meta')
+        saver.restore(session,tf.train.latest_checkpoint('./'))
+        graph = tf.get_default_graph()
+    	input_data = graph.get_tensor_by_name("input:0")
+    	targets = graph.get_tensor_by_name("targets:0")
+    	cost = graph.get_tensor_by_name("cost:0")
+    	predict_op = graph.get_tensor_by_name("predict:0")
+        train_op = tf.get_collection('optimizer')[0]
+        for i in range(iterations):
+            for j in range(n_batches):
+                Xbatch = comments[j*batch_sz:(j*batch_sz + batch_sz),]
+                Ybatch = responses[j*batch_sz:(j*batch_sz + batch_sz),]
+
+                session.run(train_op, feed_dict={input_data: Xbatch, targets: Ybatch})
+            if i % 5 == 0:
+                test_cost = session.run(cost, feed_dict={input_data: comments, targets: responses})
+                prediction = session.run(predict_op, feed_dict={input_data: comments})
+                err = error_rate(prediction, original_responses)
+                print("Cost / err at iteration i=%d, j=%d: %.3f / %.3f" % (i, j, test_cost, err))
+            costs.append(test_cost)
+            
+            if (i + 1) % 100 == 0:
+                saver.save(session, "model")
+        plt.plot(costs)
+        plt.show()
 
 main()
-
+retrain()
 
 
 
