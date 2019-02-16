@@ -85,7 +85,7 @@ class Firebase {
 
   getBot = (owner_id, bot_id) =>
     this.database
-      .ref(`owners/${owner_id}/${bot_id}`)
+      .ref(`owners/${owner_id}/bots/${bot_id}`)
       .once("value")
       .then(snapshot => {
         if (!snapshot.exists()) {
@@ -160,7 +160,9 @@ class Firebase {
         message: `bot_id is empty or nil: ${bot_id}`
       };
     }
-    return this.database.ref(`owners/${owner_id}/${bot_id}`).update(payload);
+    return this.database
+      .ref(`owners/${owner_id}/bots/${bot_id}`)
+      .update(payload);
   };
 
   updateConversation = (conversation_id, payload) => {
@@ -194,7 +196,6 @@ class Firebase {
       id: bot_id,
       name,
       description,
-      conversations: {},
       ready: false,
       source_code,
       model_url
@@ -208,13 +209,13 @@ class Firebase {
 
     // update owner bot
     await this.database
-      .ref(`owners/${owner_id}/bots/${bot_id}/conversations/${conversation_id}`)
-      .set(1);
+      .ref(`owners/${owner_id}/bots/${bot_id}/conversations`)
+      .push(conversation_id);
 
     // update chatter
     await this.database
-      .ref(`chatters/${chatter_id}/conversations/${conversation_id}`)
-      .set(1);
+      .ref(`chatters/${chatter_id}/conversations`)
+      .push(conversation_id);
 
     // create conversation
     const conversation_payload = {
@@ -245,22 +246,36 @@ class Firebase {
       .set(message_payload);
   };
 
-  registerToConversation = async conversation_id => {
-    await this.database
+  registerToConversation = (conversation_id, callback) => {
+    this.database
       .ref(`conversations/${conversation_id}/messages`)
       .orderByChild("reverse_timestamp")
-      .limitToFirst(30)
+      .limitToFirst(50)
       .on("child_added")
       .then(snapshot => {
         if (!snapshot.exists()) {
-          return {};
+          callback(null);
         }
-        return snapshot.val();
+        callback(snapshot.val());
       });
   };
 
   unregisterFromConversation = conversation_id => {
     this.database.ref(`conversations/${conversation_id}/messages`).off();
+  };
+
+  loadConversations = chatter_id => {
+    this.database
+      .ref(`chatters/${chatter_id}/conversations`)
+      .once("value")
+      .then(snapshot => {
+        if (!snapshot.exists()) {
+          throw {
+            message: `There is no conversations at chatter with chatter_id: ${chatter_id}`
+          };
+        }
+        return snapshot.val();
+      });
   };
 
   // HELPER FUNCTIONS
