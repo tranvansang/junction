@@ -20,9 +20,9 @@ import Parallax from "components/Parallax/Parallax";
 
 import { withFirebase } from "customComponents/Firebase";
 
-import signInPageStyle from "assets/jss/material-kit-react/views/signInPageStyle";
+import ForgotPasswordPageStyle from "assets/jss/material-kit-react/views/signInPageStyle";
 
-class SignInPage extends Component {
+class ForgotPasswordPage extends Component {
   componentDidMount() {
     window.scrollTo(0, 0);
     document.body.scrollTop = 0;
@@ -35,8 +35,7 @@ class SignInPage extends Component {
           <div className={classes.container}>
             <GridContainer justify="center" style={{ padding: "250px 0 0 0" }}>
               <GridItem xs={12} sm={10} md={6}>
-                <SignInForm classes={classes} />
-                <SignInLink classes={classes} />
+                <ResetPasswordForm classes={classes} />
               </GridItem>
             </GridContainer>
           </div>
@@ -46,38 +45,27 @@ class SignInPage extends Component {
   }
 }
 
-const SignInLink = classes => (
-  <div className={classes.textCenter} style={{ color: "white" }}>
-    Don't have an account?{" "}
-    <Link to="/signup" style={{ color: "white" }}>
-      Sign Up
-    </Link>
-  </div>
-);
-
-class SignInFormBase extends Component {
+class ResetPasswordFormBase extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
       email: "",
-      password: "",
       error: null
     };
   }
 
   onSubmit = event => {
-    const { email, password } = this.state;
+    const { email } = this.state;
 
     this.props.firebase
-      .signInWithEmailAndPassword(email, password)
-      .then(authUser => {
+      .sendPasswordResetEmail(email)
+      .then(() => {
         this.setState({
           email: "",
-          password: "",
           error: null
         });
-        this.props.history.push("/home");
+        this.props.history.push("/signin");
       })
       .catch(error => {
         this.setState({ error });
@@ -86,22 +74,18 @@ class SignInFormBase extends Component {
     event.preventDefault();
   };
 
-  onForgotPassword = () => {
-    this.props.history.push("/forgotpassword");
-  };
-
   onChange = event => {
     this.setState({ [event.target.name]: event.target.value });
   };
 
   render() {
     const { classes } = this.props;
-    const { email, password, error } = this.state;
+    const { email, error } = this.state;
     return (
       <Card>
         <form className={classes.form}>
           <CardHeader color="primary" signup className={classes.cardHeader}>
-            <h3 className={classes.cardTitle}>Sign In</h3>
+            <h3 className={classes.cardTitle}>Reset password</h3>
           </CardHeader>
           <CardBody signup>
             <CustomInput
@@ -123,25 +107,6 @@ class SignInFormBase extends Component {
                 )
               }}
             />
-            <CustomInput
-              id="password"
-              formControlProps={{
-                fullWidth: true
-              }}
-              inputProps={{
-                placeholder: "Password",
-                type: "password",
-                suggested: "password",
-                onChange: this.onChange,
-                name: "password",
-                value: password,
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Icon className={classes.inputIconsColor}>lock_utline</Icon>
-                  </InputAdornment>
-                )
-              }}
-            />
           </CardBody>
           <div className={classes.textCenter}>
             <Button
@@ -150,17 +115,7 @@ class SignInFormBase extends Component {
               size="lg"
               onClick={this.onSubmit}
             >
-              Get started
-            </Button>
-          </div>
-          <div className={classes.textCenter}>
-            <Button
-              onClick={this.onForgotPassword}
-              simple
-              color="primary"
-              size="lg"
-            >
-              Forgot Password?
+              Send confirmation email
             </Button>
           </div>
           {error && <p>{error.message}</p>}
@@ -170,9 +125,9 @@ class SignInFormBase extends Component {
   }
 }
 
-const SignInForm = compose(
+const ResetPasswordForm = compose(
   withRouter,
   withFirebase
-)(SignInFormBase);
+)(ResetPasswordFormBase);
 
-export default withStyles(signInPageStyle)(SignInPage);
+export default withStyles(ForgotPasswordPageStyle)(ForgotPasswordPage);
