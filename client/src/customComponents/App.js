@@ -21,7 +21,7 @@ class App extends Component {
     return (
       <Router history={hist}>
         <div>
-          <Header />
+          <Header color="transparent" />
           <Switch>
             <Route exact path="/" key="LandingPage" component={LandingPage} />
             {indexRoutes.map((prop, key) => {

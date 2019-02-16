@@ -7,11 +7,11 @@ import {
   mlAuto,
   infoColor,
   roseColor
-} from "assets/jss/material-kit-pro-react.jsx";
+} from "assets/jss/material-kit-react";
 
-import imageStyles from "assets/jss/material-kit-pro-react/imagesStyles.jsx";
+import imageStyles from "assets/jss/material-kit-react/imagesStyles";
 
-import rotatingCards from "assets/jss/material-kit-pro-react/rotatingCards.jsx";
+import rotatingCards from "assets/jss/material-kit-react/rotatingCards";
 
 const styles = {
   container,

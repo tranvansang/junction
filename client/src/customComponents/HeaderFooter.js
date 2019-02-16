@@ -15,11 +15,11 @@ import footerStyles from "assets/jss/material-kit-react/views/componentsSections
 
 const dashboardRoutes = [];
 
-const Header = rest => {
+const Header = ({ color }) => {
   return (
     <TemplateHeader
       id="top"
-      color="transparent"
+      color={color || "transparent"}
       routes={dashboardRoutes}
       brand="Chatbot Hub"
       links={<HeaderLinks dropdownHoverColor="info" />}
@@ -28,7 +28,6 @@ const Header = rest => {
         height: 300,
         color: "info"
       }}
-      {...rest}
     />
   );
 };
