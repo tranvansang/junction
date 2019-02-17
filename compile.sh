@@ -1,0 +1,2 @@
+/usr/bin/python3.6-config --ldflags
+g++ -o main *.cpp  -g -DEBUG -I../ -pthread -L/usr/lib/x86_64-linux-gnu/   -lpthread -ldl -lutil -lm  -Xlinker -export-dynamic -I/usr/include/python3.6m/  -lpython3.6m
