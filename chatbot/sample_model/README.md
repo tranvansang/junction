@@ -4,11 +4,11 @@ Instruction
 2. python chatbot_loader.py to run the model to take input from user
 
 The following files are necessary to run chatbot_loader.py:
-model.data-00000-of-00001
-model.index
-model.meta
-checkpoint
-robert_frost.txt
+model.data-00000-of-00001,
+model.index,
+model.meta,
+checkpoint,
+robert_frost.txt,
 
 -----------------------------
 
